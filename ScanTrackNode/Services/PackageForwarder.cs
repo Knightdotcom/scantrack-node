@@ -17,22 +17,36 @@ public class PackageForwarder
         _logger = logger;
     }
 
-    // DIN UPPGIFT: Vidarebefordra paketet till nästa nod i nätverket.
-    //
-    // Steg för steg:
-    //   1. Hämta nodlistan: await _registry.GetNodesAsync()
-    //      → returnerar Dictionary<string, string>  (stad → url)
-    //   2. Slå upp URL:en för 'nextCity'
-    //      → om staden inte finns: logga fel och returnera false
-    //   3. Serialisera 'package' till JSON: JsonSerializer.Serialize(package)
-    //   4. Skapa HTTP-body: new StringContent(json, Encoding.UTF8, "application/json")
-    //   5. Skapa en HttpClient: _factory.CreateClient()
-    //   6. Skicka: await http.PostAsync($"{url}/paket", content)
-    //   7. Logga att du skickade (stad + packageId): _logger.LogInformation(...)
-    //   8. Returnera response.IsSuccessStatusCode
     public async Task<bool> ForwardAsync(Package package, string nextCity)
     {
-        // TODO: implementera vidarebefordran
-        throw new NotImplementedException("Implementera ForwardAsync — se kommentarerna ovan");
+        // 1. Hämta nodlistan (stad → url) från registret
+        var nodes = await _registry.GetNodesAsync();
+
+        // 2. Slå upp URL:en för nästa stad
+        if (!nodes.TryGetValue(nextCity, out var url))
+        {
+            _logger.LogError("Kunde inte vidarebefordra {PackageId}: staden {City} finns inte i nodlistan",
+                package.PackageId, nextCity);
+            return false;
+        }
+
+        // 3. Serialisera paketet till JSON
+        var json = JsonSerializer.Serialize(package);
+
+        // 4. Skapa HTTP-body
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // 5. Skapa en HttpClient via factory
+        var http = _factory.CreateClient();
+
+        // 6. Skicka POST-anrop till nästa nods /paket-endpoint
+        var response = await http.PostAsync($"{url}/paket", content);
+
+        // 7. Logga vad som skickades
+        _logger.LogInformation("Skickade paket {PackageId} till {City} ({Url})",
+            package.PackageId, nextCity, url);
+
+        // 8. Returnera om det lyckades
+        return response.IsSuccessStatusCode;
     }
 }
