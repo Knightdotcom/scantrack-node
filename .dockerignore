@@ -1,0 +1,10 @@
+bin/
+obj/
+.env
+.git/
+.gitignore
+.vs/
+.idea/
+**/node_modules
+Dockerfile
+.dockerignore
