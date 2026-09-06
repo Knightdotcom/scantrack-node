@@ -1,7 +1,6 @@
 ---
 services:
   scantrack-node:
-    image: scantrack-node
     build:
       context: ./ScanTrackNode
       dockerfile: Dockerfile
