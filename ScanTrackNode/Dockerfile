@@ -2,7 +2,7 @@
 # Använd multi-stage build precis som på lektionen
 
 # Stage 1: Bygg
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
@@ -19,10 +19,10 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 
 # TODO: Kopiera CSV-filen (den behövs i runtime-imagen också)
-#COPY ["../data/cities.csv", "/app/publish/data/cities.csv"]
+COPY ["data/cities.csv", "/app/publish/data/cities.csv"]
 
 # Stage 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # TODO: Kopiera det publicerade projektet från build-steget
