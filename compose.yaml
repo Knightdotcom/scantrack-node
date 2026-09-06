@@ -1,0 +1,13 @@
+---
+services:
+  scantrack-node:
+    image: scantrack-node
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scantrack-node
+    restart: unless-stopped
+    ports:
+      - "80:8080"
+    volumes:
+      - ./data:/app/data:ro
