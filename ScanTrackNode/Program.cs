@@ -17,6 +17,9 @@ builder.Services.AddSingleton(new DijkstraService(graph));
 
 builder.Services.AddSingleton<NodeRegistry>();
 builder.Services.AddSingleton<PackageForwarder>();
+// Heartbeat DI for route injection and as hosted worker
+builder.Services.AddSingleton<HeartbeatService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<HeartbeatService>());
 
 var app = builder.Build();
 
