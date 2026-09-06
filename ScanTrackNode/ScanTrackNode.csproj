@@ -17,6 +17,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>data/cities.csv</Link>
     </Content>
+    <Content Include="..\compose.yaml">
+      <Link>compose.yaml</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
