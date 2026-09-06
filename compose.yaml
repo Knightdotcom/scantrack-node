@@ -3,7 +3,7 @@ services:
   scantrack-node:
     image: scantrack-node
     build:
-      context: ./ScanTrackNode
+      context: .
       dockerfile: Dockerfile
     container_name: scantrack-node
     restart: unless-stopped
