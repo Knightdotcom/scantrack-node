@@ -106,4 +106,12 @@ public class PaketController : ControllerBase
 
         return Ok(new { från = from, till = to, rutt = route, antalStopp = route.Count - 2 });
     }
+
+    [HttpPost("/forceheartbeat")]
+    public async Task<IActionResult> ForceHeartbeat([FromServices] HeartbeatService heartbeatService,
+        CancellationToken stoppingToken)
+    {
+        await heartbeatService.ForceHeartbeatAsync(stoppingToken);
+        return Ok(new { status = "heartbeat sent" });
+    }
 }
