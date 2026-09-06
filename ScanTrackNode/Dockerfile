@@ -6,19 +6,20 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# TODO: Kopiera projektfilen och kör restore
-COPY ["ScanTrackNode.csproj", "./"]
-RUN dotnet restore "ScanTrackNode.csproj"
+# Copy project file into ScanTrackNode/ and restore
+COPY ["ScanTrackNode/ScanTrackNode.csproj", "ScanTrackNode/"]
+RUN dotnet restore "ScanTrackNode/ScanTrackNode.csproj"
 
-# TODO: Kopiera resten av koden och publicera
+# Copy whole repo into image so ../data is available, then build from project folder
 COPY . .
-RUN dotnet build "./ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR /src/ScanTrackNode
+RUN dotnet build "ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish
-
-# TODO: Kopiera CSV-filen (den behövs i runtime-imagen också)
+WORKDIR /src/ScanTrackNode
+RUN dotnet publish "ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish
+# Bake the CSV into the image for production/ACR builds. Ensure data/cities.csv exists in the repository root build context.
 COPY ["data/cities.csv", "/app/publish/data/cities.csv"]
 
 # Stage 2: Runtime

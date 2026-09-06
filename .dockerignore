@@ -1,10 +1,11 @@
-bin/
-obj/
-.env
+**/bin/
+**/obj/
 .git/
-.gitignore
 .vs/
 .idea/
-**/node_modules
+.env
+*.user
+*.suo
+*.log
 Dockerfile
 .dockerignore
