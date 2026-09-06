@@ -19,7 +19,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 
 # TODO: Kopiera CSV-filen (den behövs i runtime-imagen också)
-COPY ["data/cities.csv", "/app/publish/data/cities.csv"]
+COPY ["../data/cities.csv", "/app/publish/data/cities.csv"]
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
