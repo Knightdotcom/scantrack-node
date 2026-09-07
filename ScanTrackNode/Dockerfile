@@ -1,36 +1,33 @@
-# Din Dockerfile — fyll i de saknade raderna
-# Använd multi-stage build precis som på lektionen
+# Multi-stage build för ScanTrackNode
+# Byggs från repo-roten:
+#   docker build -f ScanTrackNode/Dockerfile -t scantrack-node .
 
 # Stage 1: Bygg
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# TODO: Kopiera projektfilen och kör restore
-COPY ["ScanTrackNode.csproj", "./"]
-RUN dotnet restore "ScanTrackNode.csproj"
+# Kopiera ENDAST projektfilen först och kör restore.
+# Detta ger layer-caching: så länge csproj:en är oförändrad
+# återanvänds restore-lagret även när källkoden ändras.
+COPY ["ScanTrackNode/ScanTrackNode.csproj", "ScanTrackNode/"]
+RUN dotnet restore "ScanTrackNode/ScanTrackNode.csproj"
 
-# TODO: Kopiera resten av koden och publicera
+# Kopiera resten av koden (inklusive data/cities.csv i repo-roten)
 COPY . .
-RUN dotnet build "./ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish
-
-# TODO: Kopiera CSV-filen (den behövs i runtime-imagen också)
-COPY ["data/cities.csv", "/app/publish/data/cities.csv"]
+WORKDIR /src/ScanTrackNode
+RUN dotnet publish "ScanTrackNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 
 # Stage 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Innehåller bara ASP.NET-runtime, inte hela SDK:t — mindre och säkrare image.
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
-# TODO: Kopiera det publicerade projektet från build-steget
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
 # Porten appen lyssnar på inuti containern
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 
-# TODO: Starta appen
 ENTRYPOINT ["dotnet", "ScanTrackNode.dll"]

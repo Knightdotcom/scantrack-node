@@ -2,11 +2,13 @@
 services:
   scantrack-node:
     build:
-      context: ./ScanTrackNode
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ScanTrackNode/Dockerfile
     container_name: scantrack-node
     restart: unless-stopped
     ports:
-      - "80:8080"
-    volumes:
-      - ./data:/app/data:ro
+      - "8080:8080"
+    environment:
+      CITY_NAME: Kiruna
+      NODE_URL: http://localhost:8080
+      REGISTRY_URL: http://scantrack-registry-iths.northeurope.azurecontainer.io:8080
